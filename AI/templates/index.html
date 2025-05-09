@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+  
+    form {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+    }
+  
+    label {
+      display: block;
+      margin-bottom: 0.8rem;
+      font-weight: 500;
+    }
+  
+    input[type="number"] {
+      width: 60px;
+      padding: 4px;
+      font-size: 1rem;
+      margin-left: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  
+    button {
+      margin-right: 1rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+  
+    button:hover {
+      background-color: #2980b9;
+    }
+  
+    #results {
+      background: #fff;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    }
+  
+    h2 {
+      color: #34495e;
+    }
+  
+    p {
+      margin: 0.5rem 0;
+    }
+  </style>
+  
+  <meta charset="UTF-8">
+  <title>Movie Recommender</title>
+</head>
+<body>
+  <h1>Rate Movies</h1>
+  <form id="rateForm">
+  <label>Inception: <input type="number" name="Inception" min="0" max="5"></label><br>
+  <label>Titanic: <input type="number" name="Titanic" min="0" max="5"></label><br>
+  <label>Matrix: <input type="number" name="Matrix" min="0" max="5"></label><br>
+  <label>Avengers: <input type="number" name="Avengers" min="0" max="5"></label><br>
+  <label>Toy Story: <input type="number" name="Toy Story" min="0" max="5"></label><br>
+</form>
+
+<!-- Две кнопки -->
+<button type="button" id="recommendBtn">KNN Recommendations</button>
+<button type="button" id="predictBtn">Will I Like It?</button>
+
+<div id="results"></div>
+
+
+
+ <script>
+  document.getElementById("recommendBtn").addEventListener("click", function() {
+    const formData = new FormData(document.getElementById("rateForm"));
+    const ratings = {};
+    formData.forEach((value, key) => ratings[key] = parseInt(value) || 0);
+
+    fetch("/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(ratings)
+    })
+    .then(res => res.json())
+    .then(data => {
+      const results = document.getElementById("results");
+      results.innerHTML = "<h2>Recommended Movies (KNN)</h2>";
+      for (let movie in data) {
+        results.innerHTML += `<p>${movie}: ${data[movie]}</p>`;
+      }
+    });
+  });
+
+
+
+  document.getElementById("predictBtn").addEventListener("click", function() {
+    const formData = new FormData(document.getElementById("rateForm"));
+    const ratings = {};
+    formData.forEach((value, key) => ratings[key] = parseInt(value) || 0);
+
+    fetch("/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(ratings)
+    })
+    .then(res => res.json())
+    .then(data => {
+      const results = document.getElementById("results");
+      results.innerHTML = "<h2>Will You Like It?</h2>";
+      for (let movie in data) {
+        results.innerHTML += `<h3>${movie}</h3>`;
+        for (let algo in data[movie]) {
+          results.innerHTML += `<p>${algo}: ${data[movie][algo]}</p>`;
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
